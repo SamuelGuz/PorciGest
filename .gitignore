@@ -1,0 +1,45 @@
+# --- Entornos Virtuales ---
+# Ignora la carpeta del entorno virtual para no subir todas las librerías instaladas.
+venv/
+.venv/
+env/
+.env/
+
+# --- Artefactos de Python ---
+# Ignora las carpetas de caché que Python genera automáticamente.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Ficheros de Base de Datos Locales ---
+# Aunque usas PostgreSQL, es bueno ignorar bases de datos locales si alguna vez usas SQLite para pruebas.
+*.db
+*.sqlite3
+
+# --- Configuración de IDEs y Editores ---
+# Ignora las carpetas de configuración específicas de tu editor de código.
+.vscode/
+.idea/
+
+# --- Archivos del Sistema Operativo ---
+# Ignora archivos basura generados por macOS y Windows.
+.DS_Store
+Thumbs.db
+
+# --- Archivos de Entorno y Secretos ---
+# ¡MUY IMPORTANTE! Ignora archivos que contengan contraseñas, claves de API, etc.
+# Aunque ahora tienes la contraseña en el código, la práctica correcta es moverla a un archivo .env.
+.env
+.env.*
+
+# --- Logs ---
+# Ignora archivos de registro que pueda generar tu aplicación.
+*.log
+logs/
+
+# --- Build/Distribution Artifacts ---
+# Carpetas relacionadas con la construcción y distribución de paquetes de Python.
+build/
+dist/
+*.egg-info/
