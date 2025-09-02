@@ -1,30 +1,59 @@
 PorciGest Pro - API Backend
+
+
 Este repositorio contiene el backend de la API para PorciGest Pro, un Sistema de Gestión Porcina. La API está construida con Python y el framework FastAPI, y utiliza PostgreSQL como base de datos.
+
 Proporciona todos los endpoints necesarios para gestionar el ciclo de vida completo de los animales en una granja, incluyendo reproductoras, sementales, lechones, lotes de engorde y registros veterinarios.
+
 Tecnologías Utilizadas
+
 Python 3.11+
+
 FastAPI: Para la construcción de la API.
+
 PostgreSQL: Como motor de la base de datos.
+
 SQLAlchemy: Como ORM para interactuar con la base de datos.
+
 Alembic: Para gestionar las migraciones de la base de datos.
+
 Uvicorn: Como servidor ASGI para correr la aplicación.
+
 Pydantic: Para la validación de datos.
+
+
 Prerrequisitos
+
 Antes de empezar, asegúrate de tener instalado lo siguiente:
+
 Python 3.11 o superior.
+
 PostgreSQL.
+
 Git.
+
 Guía de Instalación y Ejecución
+
 Sigue estos pasos para poner en marcha el backend en tu entorno local.
+
 1. Clonar el Repositorio
+
 code
+
 Bash
+
 git clone <URL_DEL_REPOSITORIO>
+
 cd porcigest_pro
+
 2. Crear y Activar un Entorno Virtual
+
 Es una buena práctica aislar las dependencias del proyecto.
+
 code
+
 Bash
+
 # Crear el entorno virtual
 python -m venv venv
 
