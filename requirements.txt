@@ -1,6 +1,16 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg2-binary  # Driver para conectar Python con PostgreSQL
-alembic
-python-dotenv    # Para manejar variables de entorno (como la contraseña de la BD)
+# --- Core de la Aplicación ---
+fastapi                     # El framework web principal
+uvicorn[standard]           # El servidor ASGI para correr FastAPI
+
+# --- Base de Datos y ORM ---
+sqlalchemy                  # El ORM para interactuar con la base de datos
+alembic                     # Para las migraciones de la base de datos
+psycopg2-binary             # El "driver" o conector para PostgreSQL
+
+# --- Autenticación y Seguridad ---
+passlib[bcrypt]             # Para el hashing seguro de contraseñas
+python-jose                 # Para crear y verificar los JSON Web Tokens (JWT)
+python-multipart            # Requerido por FastAPI para procesar el login (form data)
+
+# --- Configuración y Validación ---
+pydantic-settings           # Para cargar la configuración desde el archivo .env
