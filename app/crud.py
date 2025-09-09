@@ -1,10 +1,10 @@
 # app/crud.py
 
 from sqlalchemy.orm import Session, joinedload
-from . import models, schemas
+from . import models, schemas, security
 
 # --- Operaciones CRUD para Cerdas Reproductoras ---
-# (Código existente de Cerdas)
+
 def get_cerda_by_codigo(db: Session, codigo_id: str):
     return db.query(models.CerdaReproductora).filter(models.CerdaReproductora.codigo_id == codigo_id).first()
 def get_cerda(db: Session, cerda_id: int):
@@ -34,7 +34,7 @@ def delete_cerda(db: Session, cerda_id: int):
     return db_cerda
 
 # --- OPERACIONES CRUD PARA SEMENTALES ---
-# (Código existente de Sementales)
+
 def get_semental(db: Session, semental_id: int):
     return db.query(models.Semental).filter(models.Semental.id == semental_id).first()
 def get_semental_by_nombre(db: Session, nombre: str):
@@ -64,7 +64,7 @@ def delete_semental(db: Session, semental_id: int):
     return db_semental
 
 # --- OPERACIONES CRUD PARA CAMADAS DE LECHONES ---
-# (Código existente de Camadas)
+
 def create_camada(db: Session, camada: schemas.CamadaCreate):
     db_camada = models.CamadaLechones(**camada.dict())
     db.add(db_camada)
@@ -92,7 +92,7 @@ def delete_camada(db: Session, camada_id: int):
     return db_camada
 
 # --- OPERACIONES CRUD PARA LOTES DE ENGORDE ---
-# (Código existente de Lotes de Engorde)
+
 def create_lote_engorde(db: Session, lote: schemas.LoteEngordeCreate):
     db_lote = models.LoteEngorde(**lote.dict())
     db.add(db_lote)
@@ -121,7 +121,6 @@ def delete_lote_engorde(db: Session, lote_id: int):
     db.commit()
     return db_lote
 
-
 # --- OPERACIONES CRUD PARA TRATAMIENTOS VETERINARIOS ---
 
 def create_tratamiento(db: Session, tratamiento: schemas.TratamientoCreate):
@@ -130,53 +129,42 @@ def create_tratamiento(db: Session, tratamiento: schemas.TratamientoCreate):
     db.commit()
     db.refresh(db_tratamiento)
     return get_tratamiento(db, db_tratamiento.id)
-
 def get_tratamiento(db: Session, tratamiento_id: int):
-    # Usamos joinedload para cargar las posibles relaciones por adelantado
-    return (
-        db.query(models.TratamientoVeterinario)
-        .options(
-            joinedload(models.TratamientoVeterinario.reproductora),
-            joinedload(models.TratamientoVeterinario.semental),
-            joinedload(models.TratamientoVeterinario.lote_engorde)
-        )
-        .filter(models.TratamientoVeterinario.id == tratamiento_id)
-        .first()
-    )
-
+    return db.query(models.TratamientoVeterinario).options(joinedload(models.TratamientoVeterinario.reproductora), joinedload(models.TratamientoVeterinario.semental), joinedload(models.TratamientoVeterinario.lote_engorde)).filter(models.TratamientoVeterinario.id == tratamiento_id).first()
 def get_tratamientos(db: Session, skip: int = 0, limit: int = 100):
-    # También aquí para la lista
-    return (
-        db.query(models.TratamientoVeterinario)
-        .options(
-            joinedload(models.TratamientoVeterinario.reproductora),
-            joinedload(models.TratamientoVeterinario.semental),
-            joinedload(models.TratamientoVeterinario.lote_engorde)
-        )
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
-
+    return db.query(models.TratamientoVeterinario).options(joinedload(models.TratamientoVeterinario.reproductora), joinedload(models.TratamientoVeterinario.semental), joinedload(models.TratamientoVeterinario.lote_engorde)).offset(skip).limit(limit).all()
 def update_tratamiento(db: Session, tratamiento_id: int, tratamiento_update: schemas.TratamientoUpdate):
     db_tratamiento = db.query(models.TratamientoVeterinario).filter(models.TratamientoVeterinario.id == tratamiento_id).first()
-    if not db_tratamiento:
-        return None
-
+    if not db_tratamiento: return None
     update_data = tratamiento_update.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_tratamiento, key, value)
-    
+    for key, value in update_data.items(): setattr(db_tratamiento, key, value)
     db.add(db_tratamiento)
     db.commit()
     db.refresh(db_tratamiento)
     return get_tratamiento(db, db_tratamiento.id)
-
 def delete_tratamiento(db: Session, tratamiento_id: int):
     db_tratamiento = get_tratamiento(db, tratamiento_id)
-    if not db_tratamiento:
-        return None
-    
+    if not db_tratamiento: return None
     db.delete(db_tratamiento)
     db.commit()
     return db_tratamiento
+
+# --- OPERACIONES CRUD PARA USUARIOS ---
+
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+def get_user_by_documento(db: Session, numero_documento: str):
+    return db.query(models.User).filter(models.User.numero_documento == numero_documento).first()
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = security.get_password_hash(user.password)
+    db_user = models.User(
+        nombre=user.nombre,
+        apellido=user.apellido,
+        tipo_documento=user.tipo_documento,
+        numero_documento=user.numero_documento,
+        hashed_password=hashed_password
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

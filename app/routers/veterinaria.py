@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from .. import crud, schemas
+from .. import crud, schemas, security
 from ..database import get_db
 
 router = APIRouter(
@@ -13,28 +13,20 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=schemas.Tratamiento, status_code=201)
-def create_tratamiento_veterinario(tratamiento: schemas.TratamientoCreate, db: Session = Depends(get_db)):
-    """
-    Registra una nueva intervención veterinaria (tratamiento o vacunación).
-    Se debe proporcionar exactamente UNO de los siguientes:
-    - `reproductora_id`
-    - `semental_id`
-    - `lote_engorde_id`
-    """
-    # --- Validación Clave ---
-    # Contamos cuántos IDs se han proporcionado.
+def create_tratamiento_veterinario(
+    tratamiento: schemas.TratamientoCreate, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     provided_ids = sum([
         1 for id_val in [tratamiento.reproductora_id, tratamiento.semental_id, tratamiento.lote_engorde_id]
         if id_val is not None
     ])
-
     if provided_ids != 1:
         raise HTTPException(
             status_code=400,
             detail="Se debe proporcionar exactamente un ID (reproductora, semental o lote de engorde)."
         )
-
-    # Verificamos que el ID proporcionado corresponda a un registro existente
     if tratamiento.reproductora_id and not crud.get_cerda(db, cerda_id=tratamiento.reproductora_id):
         raise HTTPException(status_code=404, detail="Reproductora no encontrada")
     if tratamiento.semental_id and not crud.get_semental(db, semental_id=tratamiento.semental_id):
@@ -46,19 +38,22 @@ def create_tratamiento_veterinario(tratamiento: schemas.TratamientoCreate, db: S
 
 
 @router.get("/", response_model=List[schemas.Tratamiento])
-def read_tratamientos_veterinarios(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """
-    Obtiene una lista de todas las intervenciones veterinarias.
-    """
+def read_tratamientos_veterinarios(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     tratamientos = crud.get_tratamientos(db, skip=skip, limit=limit)
     return tratamientos
 
 
 @router.get("/{tratamiento_id}", response_model=schemas.Tratamiento)
-def read_tratamiento_veterinario(tratamiento_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene la información de una intervención específica por su ID.
-    """
+def read_tratamiento_veterinario(
+    tratamiento_id: int, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_tratamiento = crud.get_tratamiento(db, tratamiento_id=tratamiento_id)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado")
@@ -66,10 +61,12 @@ def read_tratamiento_veterinario(tratamiento_id: int, db: Session = Depends(get_
 
 
 @router.put("/{tratamiento_id}", response_model=schemas.Tratamiento)
-def update_tratamiento_veterinario(tratamiento_id: int, tratamiento: schemas.TratamientoUpdate, db: Session = Depends(get_db)):
-    """
-    Actualiza la información de una intervención veterinaria.
-    """
+def update_tratamiento_veterinario(
+    tratamiento_id: int, 
+    tratamiento: schemas.TratamientoUpdate, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_tratamiento = crud.update_tratamiento(db, tratamiento_id=tratamiento_id, tratamiento_update=tratamiento)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para actualizar")
@@ -77,10 +74,11 @@ def update_tratamiento_veterinario(tratamiento_id: int, tratamiento: schemas.Tra
 
 
 @router.delete("/{tratamiento_id}", response_model=schemas.Tratamiento)
-def delete_tratamiento_veterinario(tratamiento_id: int, db: Session = Depends(get_db)):
-    """
-    Elimina el registro de una intervención veterinaria.
-    """
+def delete_tratamiento_veterinario(
+    tratamiento_id: int, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_tratamiento = crud.delete_tratamiento(db, tratamiento_id=tratamiento_id)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para eliminar")

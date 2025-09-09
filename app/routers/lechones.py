@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from .. import crud, models, schemas
+from .. import crud, schemas, security
 from ..database import get_db
 
 router = APIRouter(
@@ -13,13 +13,11 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=schemas.Camada, status_code=201)
-def create_camada_de_lechones(camada: schemas.CamadaCreate, db: Session = Depends(get_db)):
-    """
-    Registra una nueva camada de lechones.
-    - **madre_id**: ID de la cerda reproductora.
-    - **padre_id**: ID del semental.
-    """
-    # Verificación opcional: Asegurarse de que los padres existen
+def create_camada_de_lechones(
+    camada: schemas.CamadaCreate, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_madre = crud.get_cerda(db, cerda_id=camada.madre_id)
     if not db_madre:
         raise HTTPException(status_code=404, detail=f"No se encontró la cerda madre con ID {camada.madre_id}")
@@ -31,38 +29,44 @@ def create_camada_de_lechones(camada: schemas.CamadaCreate, db: Session = Depend
     return crud.create_camada(db=db, camada=camada)
 
 @router.get("/", response_model=List[schemas.Camada])
-def read_camadas_de_lechones(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """
-    Obtiene una lista de todas las camadas de lechones registradas.
-    """
+def read_camadas_de_lechones(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     camadas = crud.get_camadas(db, skip=skip, limit=limit)
     return camadas
 
 @router.get("/{camada_id}", response_model=schemas.Camada)
-def read_camada_de_lechones(camada_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene la información de una camada específica por su ID.
-    """
+def read_camada_de_lechones(
+    camada_id: int, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_camada = crud.get_camada(db, camada_id=camada_id)
     if db_camada is None:
         raise HTTPException(status_code=404, detail="Camada no encontrada")
     return db_camada
 
 @router.put("/{camada_id}", response_model=schemas.Camada)
-def update_camada_de_lechones(camada_id: int, camada: schemas.CamadaUpdate, db: Session = Depends(get_db)):
-    """
-    Actualiza la información de una camada específica.
-    """
+def update_camada_de_lechones(
+    camada_id: int, 
+    camada: schemas.CamadaUpdate, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_camada = crud.update_camada(db, camada_id=camada_id, camada_update=camada)
     if db_camada is None:
         raise HTTPException(status_code=404, detail="Camada no encontrada para actualizar")
     return db_camada
 
 @router.delete("/{camada_id}", response_model=schemas.Camada)
-def delete_camada_de_lechones(camada_id: int, db: Session = Depends(get_db)):
-    """
-    Elimina el registro de una camada específica.
-    """
+def delete_camada_de_lechones(
+    camada_id: int, 
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(security.get_current_user)
+):
     db_camada = crud.delete_camada(db, camada_id=camada_id)
     if db_camada is None:
         raise HTTPException(status_code=404, detail="Camada no encontrada para eliminar")
