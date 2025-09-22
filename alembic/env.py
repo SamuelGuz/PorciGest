@@ -9,45 +9,19 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# --- MODIFICACIÓN 1: INICIO ---
-# Añade la ruta del proyecto al path de Python para que Alembic encuentre tus módulos (como 'app')
-# Esto es crucial para que pueda importar 'Base' desde 'app.models'
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from app.models import Base  # Importa la Base declarativa de tus modelos
+from app.models import Base  
 from app.database import SQLALCHEMY_DATABASE_URL
- # Importa la URL de conexión a la BD
 
-
-# --- MODIFICACIÓN 1: FIN ---
-
-
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
-# --- MODIFICACIÓN 2: INICIO ---
-# Configura la URL de la base de datos directamente desde tu código
-# Esto evita tener que mantener la URL en dos lugares (database.py y alembic.ini)
 config.set_main_option('sqlalchemy.url', SQLALCHEMY_DATABASE_URL.replace('%', '%%'))
 
-# --- MODIFICACIÓN 2: FIN ---
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-
-# --- MODIFICACIÓN 3: INICIO ---
-# Apunta al MetaData de tu Base para que Alembic sepa qué tablas y columnas deben existir
 target_metadata = Base.metadata
-# --- MODIFICACIÓN 3: FIN ---
-
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

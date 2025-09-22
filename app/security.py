@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from . import schemas, models # Ya no importamos 'crud' aquí arriba
+from . import schemas, models 
 from .database import SessionLocal
 from .config import settings
 
@@ -39,8 +39,6 @@ def get_db():
         db.close()
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    # --- ¡AQUÍ ESTÁ LA CORRECCIÓN CLAVE! ---
-    # Importamos 'crud' localmente dentro de la función para romper el ciclo.
     from . import crud
     
     credentials_exception = HTTPException(

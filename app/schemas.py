@@ -14,17 +14,19 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+# Schema para la respuesta pública, sin datos sensibles
+class UserPublic(UserBase):
+    id: int
+    class Config: from_attributes = True
+
 class User(UserBase):
     id: int
     is_active: bool
-
-    class Config:
-        from_attributes = True
+    class Config: from_attributes = True
 
 class Token(BaseModel):
     access_token: str
     token_type: str
-
 class TokenData(BaseModel):
     numero_documento: Optional[str] = None
 
@@ -43,6 +45,7 @@ class CerdaUpdate(BaseModel):
     estado_reproductivo: Optional[str] = None
 class Cerda(CerdaBase):
     id: int
+    propietario: UserPublic
     class Config: from_attributes = True
 
 
@@ -58,6 +61,7 @@ class SementalUpdate(BaseModel):
     tasa_fertilidad: Optional[float] = None
 class Semental(SementalBase):
     id: int
+    propietario: UserPublic
     class Config: from_attributes = True
 
 
@@ -79,6 +83,7 @@ class Camada(CamadaBase):
     id: int
     madre: Cerda
     padre: Semental
+    propietario: UserPublic
     class Config: from_attributes = True
 
 
@@ -99,6 +104,7 @@ class LoteEngordeUpdate(BaseModel):
 class LoteEngorde(LoteEngordeBase):
     id: int
     camada_origen: Camada
+    propietario: UserPublic
     class Config: from_attributes = True
 
 
@@ -129,4 +135,5 @@ class Tratamiento(TratamientoBase):
     reproductora: Optional[Cerda] = None
     semental: Optional[Semental] = None
     lote_engorde: Optional[LoteEngorde] = None
+    propietario: UserPublic
     class Config: from_attributes = True

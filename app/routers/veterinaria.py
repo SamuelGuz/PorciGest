@@ -18,6 +18,13 @@ def create_tratamiento_veterinario(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(security.get_current_user)
 ):
+    """
+    Registra una nueva intervención veterinaria y la asocia al usuario autenticado.
+    Se debe proporcionar exactamente UNO de los siguientes:
+    - `reproductora_id`
+    - `semental_id`
+    - `lote_engorde_id`
+    """
     provided_ids = sum([
         1 for id_val in [tratamiento.reproductora_id, tratamiento.semental_id, tratamiento.lote_engorde_id]
         if id_val is not None
@@ -27,6 +34,7 @@ def create_tratamiento_veterinario(
             status_code=400,
             detail="Se debe proporcionar exactamente un ID (reproductora, semental o lote de engorde)."
         )
+
     if tratamiento.reproductora_id and not crud.get_cerda(db, cerda_id=tratamiento.reproductora_id):
         raise HTTPException(status_code=404, detail="Reproductora no encontrada")
     if tratamiento.semental_id and not crud.get_semental(db, semental_id=tratamiento.semental_id):
@@ -34,7 +42,8 @@ def create_tratamiento_veterinario(
     if tratamiento.lote_engorde_id and not crud.get_lote_engorde(db, lote_id=tratamiento.lote_engorde_id):
         raise HTTPException(status_code=404, detail="Lote de engorde no encontrado")
 
-    return crud.create_tratamiento(db=db, tratamiento=tratamiento)
+    # Pasamos el ID del usuario actual a la función del CRUD
+    return crud.create_tratamiento(db=db, tratamiento=tratamiento, user_id=current_user.id)
 
 
 @router.get("/", response_model=List[schemas.Tratamiento])
@@ -44,6 +53,9 @@ def read_tratamientos_veterinarios(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(security.get_current_user)
 ):
+    """
+    Obtiene una lista de todas las intervenciones veterinarias.
+    """
     tratamientos = crud.get_tratamientos(db, skip=skip, limit=limit)
     return tratamientos
 
@@ -54,6 +66,9 @@ def read_tratamiento_veterinario(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(security.get_current_user)
 ):
+    """
+    Obtiene la información de una intervención específica por su ID.
+    """
     db_tratamiento = crud.get_tratamiento(db, tratamiento_id=tratamiento_id)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado")
@@ -67,6 +82,9 @@ def update_tratamiento_veterinario(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(security.get_current_user)
 ):
+    """
+    Actualiza la información de una intervención veterinaria.
+    """
     db_tratamiento = crud.update_tratamiento(db, tratamiento_id=tratamiento_id, tratamiento_update=tratamiento)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para actualizar")
@@ -79,6 +97,9 @@ def delete_tratamiento_veterinario(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(security.get_current_user)
 ):
+    """
+    Elimina el registro de una intervención veterinaria.
+    """
     db_tratamiento = crud.delete_tratamiento(db, tratamiento_id=tratamiento_id)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para eliminar")
