@@ -32,10 +32,18 @@ def update_cerda(db: Session, cerda_id: int, cerda_update: schemas.CerdaUpdate):
     return db_cerda
 
 def delete_cerda(db: Session, cerda_id: int):
-    db_cerda = db.query(models.CerdaReproductora).filter(models.CerdaReproductora.id == cerda_id).first()
-    if not db_cerda: return None
+    # Cargamos la cerda con su relación propietario ANTES de eliminar
+    db_cerda = db.query(models.CerdaReproductora).options(joinedload(models.CerdaReproductora.propietario)).filter(models.CerdaReproductora.id == cerda_id).first()
+    if not db_cerda: 
+        return None
+    
+    # Forzamos la carga de la relación para evitar lazy loading después del delete
+    _ = db_cerda.propietario  # Esto carga la relación
+    
+    # Eliminamos el objeto de la base de datos
     db.delete(db_cerda)
     db.commit()
+    
     return db_cerda
 
 # --- OPERACIONES CRUD PARA SEMENTALES ---
@@ -67,10 +75,18 @@ def update_semental(db: Session, semental_id: int, semental_update: schemas.Seme
     return db_semental
 
 def delete_semental(db: Session, semental_id: int):
-    db_semental = db.query(models.Semental).filter(models.Semental.id == semental_id).first()
-    if not db_semental: return None
+    # Cargamos el semental con su relación propietario ANTES de eliminar
+    db_semental = db.query(models.Semental).options(joinedload(models.Semental.propietario)).filter(models.Semental.id == semental_id).first()
+    if not db_semental: 
+        return None
+    
+    # Forzamos la carga de la relación para evitar lazy loading después del delete
+    _ = db_semental.propietario  # Esto carga la relación
+    
+    # Eliminamos el objeto de la base de datos
     db.delete(db_semental)
     db.commit()
+    
     return db_semental
 
 # --- OPERACIONES CRUD PARA CAMADAS DE LECHONES ---
@@ -100,7 +116,14 @@ def update_camada(db: Session, camada_id: int, camada_update: schemas.CamadaUpda
 
 def delete_camada(db: Session, camada_id: int):
     db_camada = get_camada(db, camada_id)
-    if not db_camada: return None
+    if not db_camada: 
+        return None
+    
+    # Forzamos la carga de las relaciones para evitar lazy loading después del delete
+    _ = db_camada.propietario
+    _ = db_camada.madre
+    _ = db_camada.padre
+    
     db.delete(db_camada)
     db.commit()
     return db_camada
@@ -135,7 +158,13 @@ def update_lote_engorde(db: Session, lote_id: int, lote_update: schemas.LoteEngo
 
 def delete_lote_engorde(db: Session, lote_id: int):
     db_lote = get_lote_engorde(db, lote_id)
-    if not db_lote: return None
+    if not db_lote: 
+        return None
+    
+    # Forzamos la carga de las relaciones para evitar lazy loading después del delete
+    _ = db_lote.propietario
+    _ = db_lote.camada_origen
+    
     db.delete(db_lote)
     db.commit()
     return db_lote
@@ -167,7 +196,15 @@ def update_tratamiento(db: Session, tratamiento_id: int, tratamiento_update: sch
 
 def delete_tratamiento(db: Session, tratamiento_id: int):
     db_tratamiento = get_tratamiento(db, tratamiento_id)
-    if not db_tratamiento: return None
+    if not db_tratamiento: 
+        return None
+    
+    # Forzamos la carga de las relaciones para evitar lazy loading después del delete
+    _ = db_tratamiento.propietario
+    _ = db_tratamiento.reproductora  # Puede ser None
+    _ = db_tratamiento.semental      # Puede ser None  
+    _ = db_tratamiento.lote_engorde  # Puede ser None
+    
     db.delete(db_tratamiento)
     db.commit()
     return db_tratamiento
