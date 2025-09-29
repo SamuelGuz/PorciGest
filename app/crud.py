@@ -1,6 +1,8 @@
 # app/crud.py
 
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import or_, and_, func
+from datetime import datetime, date, timedelta
 from . import models, schemas, security
 
 # --- Operaciones CRUD para Cerdas Reproductoras ---
@@ -227,3 +229,152 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+# --- OPERACIONES CRUD PARA MOVIMIENTOS ---
+
+def create_movimiento(db: Session, movimiento: schemas.MovimientoCreate, user_id: int, usuario_nombre: str):
+    """Crear un nuevo registro de movimiento"""
+    db_movimiento = models.Movimiento(
+        usuario_id=user_id,
+        usuario_nombre=usuario_nombre,
+        accion=movimiento.accion,
+        modulo=movimiento.modulo,
+        descripcion=movimiento.descripcion,
+        entidad_tipo=movimiento.entidad_tipo,
+        entidad_id=movimiento.entidad_id,
+        tipo_movimiento=movimiento.tipo_movimiento,
+        ip_address=movimiento.ip_address,
+        user_agent=movimiento.user_agent,
+        fecha_movimiento=datetime.utcnow()
+    )
+    db.add(db_movimiento)
+    db.commit()
+    db.refresh(db_movimiento)
+    return db_movimiento
+
+def get_movimientos(db: Session, filters: schemas.MovimientoFilters):
+    """Obtener movimientos con filtros y paginación"""
+    query = db.query(models.Movimiento)
+    
+    # Aplicar filtros
+    if filters.search:
+        search_term = f"%{filters.search}%"
+        query = query.filter(
+            or_(
+                models.Movimiento.usuario_nombre.ilike(search_term),
+                models.Movimiento.accion.ilike(search_term),
+                models.Movimiento.descripcion.ilike(search_term)
+            )
+        )
+    
+    if filters.modulo:
+        query = query.filter(models.Movimiento.modulo == filters.modulo)
+    
+    if filters.tipo_movimiento:
+        query = query.filter(models.Movimiento.tipo_movimiento == filters.tipo_movimiento)
+    
+    if filters.usuario_id:
+        query = query.filter(models.Movimiento.usuario_id == filters.usuario_id)
+    
+    if filters.fecha_inicio and filters.fecha_fin:
+        fecha_inicio = datetime.combine(filters.fecha_inicio, datetime.min.time())
+        fecha_fin = datetime.combine(filters.fecha_fin, datetime.max.time())
+        query = query.filter(
+            and_(
+                models.Movimiento.fecha_movimiento >= fecha_inicio,
+                models.Movimiento.fecha_movimiento <= fecha_fin
+            )
+        )
+    
+    # Ordenar por fecha más reciente
+    query = query.order_by(models.Movimiento.fecha_movimiento.desc())
+    
+    # Contar total de registros (antes de la paginación)
+    total = query.count()
+    
+    # Aplicar paginación
+    offset = (filters.page - 1) * filters.size
+    movimientos = query.offset(offset).limit(filters.size).all()
+    
+    return {
+        "movimientos": movimientos,
+        "total": total,
+        "page": filters.page,
+        "size": filters.size,
+        "total_pages": (total + filters.size - 1) // filters.size
+    }
+
+def get_movimiento(db: Session, movimiento_id: int):
+    """Obtener un movimiento específico"""
+    return db.query(models.Movimiento).filter(models.Movimiento.id == movimiento_id).first()
+
+def get_estadisticas_movimientos(db: Session, dias: int = 30):
+    """Obtener estadísticas de movimientos de los últimos N días"""
+    fecha_limite = datetime.utcnow() - timedelta(days=dias)
+    
+    # Total de movimientos
+    total_movimientos = db.query(models.Movimiento).filter(
+        models.Movimiento.fecha_movimiento >= fecha_limite
+    ).count()
+    
+    # Movimientos por tipo
+    movimientos_por_tipo = db.query(
+        models.Movimiento.tipo_movimiento,
+        func.count(models.Movimiento.id).label('count')
+    ).filter(
+        models.Movimiento.fecha_movimiento >= fecha_limite
+    ).group_by(models.Movimiento.tipo_movimiento).all()
+    
+    # Movimientos por módulo
+    movimientos_por_modulo = db.query(
+        models.Movimiento.modulo,
+        func.count(models.Movimiento.id).label('count')
+    ).filter(
+        models.Movimiento.fecha_movimiento >= fecha_limite
+    ).group_by(models.Movimiento.modulo).all()
+    
+    # Usuarios más activos
+    usuarios_activos = db.query(
+        models.Movimiento.usuario_nombre,
+        func.count(models.Movimiento.id).label('count')
+    ).filter(
+        models.Movimiento.fecha_movimiento >= fecha_limite
+    ).group_by(models.Movimiento.usuario_nombre).order_by(
+        func.count(models.Movimiento.id).desc()
+    ).limit(5).all()
+    
+    return {
+        "total_movimientos": total_movimientos,
+        "movimientos_por_tipo": [{"tipo": item[0], "cantidad": item[1]} for item in movimientos_por_tipo],
+        "movimientos_por_modulo": [{"modulo": item[0], "cantidad": item[1]} for item in movimientos_por_modulo],
+        "usuarios_activos": [{"usuario": item[0], "cantidad": item[1]} for item in usuarios_activos],
+        "periodo_dias": dias
+    }
+
+# Función auxiliar para registrar movimientos automáticamente
+def registrar_movimiento_automatico(
+    db: Session, 
+    usuario_id: int, 
+    usuario_nombre: str,
+    accion: str,
+    modulo: str,
+    descripcion: str,
+    tipo_movimiento: str,
+    entidad_tipo: str = None,
+    entidad_id: int = None,
+    ip_address: str = None,
+    user_agent: str = None
+):
+    """Función auxiliar para registrar movimientos automáticamente desde otros módulos"""
+    movimiento_data = schemas.MovimientoCreate(
+        accion=accion,
+        modulo=modulo,
+        descripcion=descripcion,
+        entidad_tipo=entidad_tipo,
+        entidad_id=entidad_id,
+        tipo_movimiento=tipo_movimiento,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
+    return create_movimiento(db, movimiento_data, usuario_id, usuario_nombre)

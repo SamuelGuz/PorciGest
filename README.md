@@ -1,114 +1,243 @@
-PorciGest Pro - API Backend
+# 🐷 PorciGest - Sistema de Gestión Porcina
 
+## 📋 DESCRIPCIÓN
 
-Este repositorio contiene el backend de la API para PorciGest Pro, un Sistema de Gestión Porcina. La API está construida con Python y el framework FastAPI, y utiliza PostgreSQL como base de datos.
+**PorciGest** es un sistema integral de gestión porcina desarrollado con tecnologías modernas. Permite el control completo de granjas porcinas incluyendo reproductoras, sementales, lechones, engorde, tratamientos veterinarios y un sistema completo de auditoría.
 
-Proporciona todos los endpoints necesarios para gestionar el ciclo de vida completo de los animales en una granja, incluyendo reproductoras, sementales, lechones, lotes de engorde y registros veterinarios.
+### 🎯 **Características principales:**
+- ✅ **Gestión completa de reproductoras** - Control de cerdas, ciclos reproductivos
+- ✅ **Administración de sementales** - Registro y seguimiento de machos reproductores  
+- ✅ **Control de lechones** - Camadas, nacimientos, destetes
+- ✅ **Manejo de engorde** - Lotes de engorde y seguimiento de peso
+- ✅ **Tratamientos veterinarios** - Registro médico y sanitario
+- ✅ **Sistema de auditoría** - Trazabilidad completa de todas las operaciones
+- ✅ **Exportación PDF** - Reportes profesionales de movimientos
+- ✅ **Autenticación segura** - Sistema JWT con roles de usuario
+- ✅ **Interfaz moderna** - Diseño responsive con Material-UI
 
-Tecnologías Utilizadas
+## 🛠️ TECNOLOGÍAS
 
-Python 3.11+
+### **Backend**
+- **FastAPI** 0.104.1 - Framework web moderno y rápido
+- **SQLAlchemy** 2.0.23 - ORM para base de datos
+- **Alembic** 1.13.0 - Migraciones de base de datos
+- **Pydantic** 2.5.0 - Validación de datos
+- **JWT** - Autenticación segura con tokens
+- **SQLite/PostgreSQL** - Base de datos (desarrollo/producción)
 
-FastAPI: Para la construcción de la API.
+### **Frontend**
+- **Next.js** 15.5.2 - Framework React con SSR
+- **React** 19.1.0 - Librería de interfaz de usuario
+- **Material-UI** 7.3.2 - Componentes de diseño
+- **TypeScript** 5.0+ - Tipado estático
+- **Axios** 1.12.2 - Cliente HTTP
+- **jsPDF** 3.0.3 - Generación de PDFs
 
-PostgreSQL: Como motor de la base de datos.
+## 🚀 INSTALACIÓN RÁPIDA
 
-SQLAlchemy: Como ORM para interactuar con la base de datos.
+```bash
+# 1. Clonar repositorio
+git clone https://github.com/SamuelGuz/PorciGest.git
+cd PorciGest
 
-Alembic: Para gestionar las migraciones de la base de datos.
-
-Uvicorn: Como servidor ASGI para correr la aplicación.
-
-Pydantic: Para la validación de datos.
-
-
-Prerrequisitos
-
-Antes de empezar, asegúrate de tener instalado lo siguiente:
-
-Python 3.11 o superior.
-
-PostgreSQL.
-
-Git.
-
-Guía de Instalación y Ejecución
-
-Sigue estos pasos para poner en marcha el backend en tu entorno local.
-
-1. Clonar el Repositorio
-
-code
-
-Bash
-
-git clone <URL_DEL_REPOSITORIO>
-
-cd porcigest_pro
-
-2. Crear y Activar un Entorno Virtual
-
-Es una buena práctica aislar las dependencias del proyecto.
-
-code
-
-Bash
-
-# Crear el entorno virtual
+# 2. Backend (Terminal 1)
 python -m venv venv
-
-# Activar el entorno virtual
-# En Windows:
-venv\Scripts\activate
-# En macOS/Linux:
-source venv/bin/activate
-3. Instalar Dependencias
-Instala todas las librerías necesarias listadas en el archivo requirements.txt.
-code
-Bash
+venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-4. Configuración de la Base de Datos
-El proyecto necesita un usuario y una base de datos dedicados en PostgreSQL.
-a) Configurar la Conexión:
-Abre el archivo app/database.py y asegúrate de que los datos de DB_USER, DB_PASSWORD y DB_NAME coincidan con los que vas a crear.
-b) Crear el Usuario y la Base de Datos:
-Abre una terminal de psql como superusuario (postgres) y ejecuta los siguientes comandos:
-code
-Bash
-# Entrar a la terminal de PostgreSQL
-psql -U postgres
-Una vez dentro (postgres=#), ejecuta:
-code
-SQL
--- 1. Crear el nuevo usuario con su contraseña
-CREATE USER "user" WITH PASSWORD '1234567';
-
--- 2. Crear la base de datos
-CREATE DATABASE porcigest;
-
--- 3. Asignar la base de datos al nuevo usuario
-ALTER DATABASE porcigest OWNER TO "user";
-
--- 4. Salir de psql
-\q
-c) Aplicar las Migraciones:
-Alembic se encargará de crear todas las tablas necesarias en la base de datos.
-code
-Bash
-# Este comando crea las tablas y las actualiza a la última versión
 alembic upgrade head
-Nota: Si es la primera vez que configuras el proyecto, no es necesario ejecutar alembic revision --autogenerate, ya que los archivos de migración ya están en el repositorio.
-5. Ejecutar la Aplicación
-Con todo configurado, inicia el servidor de desarrollo con Uvicorn.
-code
-Bash
-uvicorn app.main:app --reload
---reload: Esta opción es muy útil en desarrollo, ya que reinicia el servidor automáticamente cada vez que detecta un cambio en el código.
-El servidor estará corriendo y disponible en http://127.0.0.1:8000.
-Uso de la API y Documentación
-FastAPI genera automáticamente una documentación interactiva que es la mejor herramienta para entender y probar la API.
-Documentación Interactiva (Swagger UI):
-http://127.0.0.1:8000/docs
-Documentación Alternativa (ReDoc):
-http://127.0.0.1:8000/redoc
-Desde la interfaz de Swagger, el equipo de frontend puede ver todos los endpoints, sus parámetros, los esquemas de datos y ejecutar peticiones de prueba directamente desde el navegador.
+python -m uvicorn app.main:app --reload --port 8000
+
+# 3. Frontend (Terminal 2)
+cd porcigest_frontend-main
+npm install
+npm run dev
+```
+
+**Acceso:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Documentación: http://localhost:8000/docs
+
+## 📊 MÓDULOS DEL SISTEMA
+
+### 🐷 **Reproductoras**
+- Registro de cerdas reproductoras
+- Control de ciclos reproductivos
+- Historial de partos y gestaciones
+- Estados: Gestante, Lactante, Vacía, etc.
+
+### 🐗 **Sementales**
+- Gestión de machos reproductores
+- Control genealógico
+- Registro de servicios
+- Evaluación de rendimiento
+
+### 🐽 **Lechones**
+- Control de camadas
+- Registro de nacimientos
+- Seguimiento de destetes
+- Mortalidad y tratamientos
+
+### 🥩 **Engorde**
+- Lotes de engorde
+- Control de peso y ganancia
+- Seguimiento nutricional
+- Preparación para venta
+
+### 💉 **Veterinaria**
+- Tratamientos médicos
+- Vacunaciones y medicamentos
+- Historial sanitario
+- Protocolos de prevención
+
+### 📋 **Movimientos (Auditoría)**
+- Registro automático de todas las operaciones
+- Trazabilidad completa del sistema
+- Filtros y búsquedas avanzadas
+- Exportación de reportes en PDF
+
+## 🗄️ ESTRUCTURA DE BASE DE DATOS
+
+```sql
+-- Principales tablas del sistema
+users                    -- Usuarios del sistema
+cerdas_reproductoras     -- Reproductoras
+sementales              -- Machos reproductores  
+camadas_lechones        -- Camadas de lechones
+lotes_engorde           -- Lotes de engorde
+tratamientos_veterinarios -- Tratamientos médicos
+movimientos             -- Auditoría del sistema
+```
+
+## 📁 ESTRUCTURA DEL PROYECTO
+
+```
+PorciGest/
+├── 📁 app/                           # Backend FastAPI
+│   ├── 📁 routers/                  # Endpoints API
+│   │   ├── auth.py                  # Autenticación
+│   │   ├── reproductoras.py         # CRUD reproductoras
+│   │   ├── sementales.py            # CRUD sementales
+│   │   ├── lechones.py              # CRUD lechones
+│   │   ├── engorde.py               # CRUD engorde
+│   │   ├── veterinaria.py           # CRUD veterinaria
+│   │   └── movimientos.py           # Sistema auditoría
+│   ├── 📄 models.py                 # Modelos SQLAlchemy
+│   ├── 📄 schemas.py                # Schemas Pydantic
+│   ├── 📄 crud.py                   # Operaciones CRUD
+│   ├── 📄 security.py               # JWT y autenticación
+│   ├── 📄 database.py               # Configuración BD
+│   └── 📄 main.py                   # Aplicación principal
+├── 📁 alembic/                      # Migraciones BD
+├── 📁 porcigest_frontend-main/      # Frontend Next.js
+│   ├── 📁 app/                      # Páginas y layouts
+│   │   ├── 📁 dashboard/            # Páginas principales
+│   │   ├── 📁 login/                # Autenticación
+│   │   └── 📁 ui/                   # Componentes UI
+│   ├── 📁 src/                      # Hooks y servicios
+│   │   ├── 📁 hooks/                # Custom hooks
+│   │   ├── 📁 services/             # Configuración API
+│   │   └── 📁 types/                # Tipos TypeScript
+│   └── 📄 package.json              # Dependencias NPM
+├── 📄 requirements.txt              # Dependencias Python
+├── 📄 INSTALLATION_GUIDE.md         # Guía de instalación
+└── 📄 FRONTEND_DEPENDENCIES.md      # Documentación frontend
+```
+
+## 🔐 SEGURIDAD
+
+- **Autenticación JWT** con tokens seguros
+- **Hashing bcrypt** para contraseñas
+- **Validación de datos** con Pydantic
+- **CORS configurado** para desarrollo
+- **Manejo de errores** centralizado
+- **Logs de auditoría** completos
+
+## 📈 CARACTERÍSTICAS AVANZADAS
+
+### **Sistema de Auditoría**
+- Registro automático de todas las operaciones CRUD
+- Información de usuario, fecha, IP y acción realizada
+- Filtros por módulo, tipo de operación y fechas
+- Exportación de reportes en PDF profesional
+
+### **API REST Completa**
+- Documentación automática con Swagger
+- Endpoints organizados por módulos
+- Filtros y paginación en todas las consultas
+- Respuestas estandarizadas
+
+### **Frontend Moderno**
+- Interfaz responsive con Material-UI
+- Custom hooks para manejo de estado
+- TypeScript para mejor desarrollo
+- Hot reload con Turbopack
+
+## 📋 SCRIPTS UTILITARIOS
+
+```bash
+# Inicializar base de datos con datos de prueba
+python init_database.py
+
+# Crear usuario administrador
+python crear_usuario.py
+
+# Crear movimientos de prueba
+python crear_movimientos_prueba.py
+
+# Gestionar usuarios desde CLI
+python gestionar_usuarios.py
+```
+
+## 🔧 CONFIGURACIÓN
+
+### **Variables de entorno Backend (.env)**
+```env
+SECRET_KEY=clave_secreta_jwt_aqui
+DATABASE_URL=sqlite:///./porcigest_dev.db
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+### **Variables de entorno Frontend (.env.local)**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## 📖 DOCUMENTACIÓN ADICIONAL
+
+- **[Guía de Instalación](INSTALLATION_GUIDE.md)** - Instrucciones detalladas
+- **[Dependencias Frontend](porcigest_frontend-main/FRONTEND_DEPENDENCIES.md)** - Documentación de librerías
+- **[API Docs](http://localhost:8000/docs)** - Documentación interactiva Swagger
+
+## 🤝 CONTRIBUCIÓN
+
+1. Fork del proyecto
+2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
+
+## 📄 LICENCIA
+
+Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
+
+## 👥 AUTORES
+
+- **Equipo PorciGest** - Desarrollo inicial
+- **Samuel Guzman** - Mantenedor principal
+
+## 🆔 VERSIÓN
+
+**v1.0.0** - Sistema completo funcional
+- ✅ CRUD completo para todos los módulos
+- ✅ Sistema de auditoría implementado  
+- ✅ Exportación PDF funcionando
+- ✅ Autenticación JWT operativa
+- ✅ Base de datos con migraciones
+- ✅ Frontend responsive completado
+
+---
+
+Desarrollado con ❤️ para la gestión moderna de granjas porcinas
+
+**🐷 PorciGest - Tecnología al servicio de la porcicultura 🐷**

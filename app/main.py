@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import reproductoras, sementales, lechones, engorde, veterinaria, auth
+from .routers import reproductoras, sementales, lechones, engorde, veterinaria, auth, movimientos
 from . import models
 from .database import engine
 
@@ -13,7 +13,14 @@ app = FastAPI(
     description="API para la gestión de granjas porcinas.",
     version="1.1.0",
 )
-origins = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
+origins = [
+    "http://localhost:3000", 
+    "http://localhost:3001", 
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001", 
+    "http://127.0.0.1:5173"
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -29,6 +36,7 @@ app.include_router(sementales.router)
 app.include_router(lechones.router)
 app.include_router(engorde.router)
 app.include_router(veterinaria.router)
+app.include_router(movimientos.router)
 
 @app.get("/")
 def read_root():

@@ -1,16 +1,66 @@
+# ============================================================================
+# REQUIREMENTS.TXT - PORCIGEST SISTEMA DE GESTIÓN PORCINA
+# ============================================================================
+# Actualizado: 29 de septiembre de 2025
+# Sistema completo con autenticación, CRUD, auditoría y exportación
+
 # --- Core de la Aplicación ---
-fastapi                     # El framework web principal
-uvicorn[standard]           # El servidor ASGI para correr FastAPI
+fastapi==0.104.1               # Framework web principal para APIs REST
+uvicorn[standard]==0.24.0      # Servidor ASGI para correr FastAPI con extras
+pydantic==2.5.0               # Validación de datos y settings
 
 # --- Base de Datos y ORM ---
-sqlalchemy                  # El ORM para interactuar con la base de datos
-alembic                     # Para las migraciones de la base de datos
-psycopg2-binary             # El "driver" o conector para PostgreSQL
+sqlalchemy==2.0.23            # ORM para interactuar con la base de datos
+alembic==1.13.0               # Migraciones de base de datos
+
+# --- Conectores de Base de Datos ---
+psycopg2-binary==2.9.9        # Conector para PostgreSQL (producción)
+# sqlite (incluido en Python) se usa para desarrollo local
 
 # --- Autenticación y Seguridad ---
-passlib[bcrypt]             # Para el hashing seguro de contraseñas
-python-jose                 # Para crear y verificar los JSON Web Tokens (JWT)
-python-multipart            # Requerido por FastAPI para procesar el login (form data)
+passlib[bcrypt]==1.7.4        # Hashing seguro de contraseñas con bcrypt
+python-jose[cryptography]==3.3.0  # JSON Web Tokens (JWT) con criptografía
+python-multipart==0.0.6       # Procesamiento de form data para login
 
-# --- Configuración y Validación ---
-pydantic-settings           # Para cargar la configuración desde el archivo .env
+# --- Configuración y Variables de Entorno ---
+pydantic-settings==2.1.0      # Carga configuración desde archivos .env
+python-dotenv==1.0.0          # Carga variables de entorno desde .env
+
+# --- Utilidades de Fecha y Tiempo ---
+# datetime (incluido en Python estándar)
+
+# --- Desarrollo y Testing (Opcional) ---
+# pytest==7.4.3               # Framework de testing
+# httpx==0.25.2               # Cliente HTTP para testing async
+# pytest-asyncio==0.21.1      # Support async en pytest
+
+# --- Logging y Monitoreo (Opcional) ---
+# python-json-logger==2.0.7   # Structured logging en JSON
+
+# ============================================================================
+# NOTAS DE INSTALACIÓN:
+# 
+# 1. Para instalar todas las dependencias:
+#    pip install -r requirements.txt
+#
+# 2. Para desarrollo local (con SQLite):
+#    No se requiere psycopg2-binary
+#
+# 3. Para producción (con PostgreSQL):
+#    Todas las dependencias son necesarias
+#
+# 4. Variables de entorno requeridas (archivo .env):
+#    - SECRET_KEY: Clave secreta para JWT
+#    - DATABASE_URL: URL de conexión a la base de datos
+#    - ACCESS_TOKEN_EXPIRE_MINUTES: Tiempo de expiración de tokens
+#
+# 5. El sistema incluye:
+#    ✅ Autenticación JWT completa
+#    ✅ CRUD para todos los módulos
+#    ✅ Sistema de auditoría (movimientos)
+#    ✅ Filtros y búsquedas avanzadas
+#    ✅ Validación de datos con Pydantic
+#    ✅ Migraciones automáticas con Alembic
+#    ✅ CORS configurado para frontend
+#    ✅ Manejo de errores y logging
+# ============================================================================

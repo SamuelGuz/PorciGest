@@ -1,236 +1,210 @@
-"use client";
-import { useRouter } from 'next/navigation';
-import EditIcon from '@mui/icons-material/Edit';
-import { Button, TextField, Snackbar, Alert, LinearProgress } from '@mui/material';
+'use client';
 
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
-import HeaderGestion from '@/ui/utils/HeaderGestion';
+import React, { useState } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Paper,
+  Tabs,
+  Tab,
+  Fade,
+  Alert,
+  Snackbar,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Assessment as AssessmentIcon,
+  TableView as TableIcon,
+} from '@mui/icons-material';
+import { useEngorde } from '../../../src/hooks/useEngorde';
+import CardsEngorde from '../../ui/engorde/CardsEngorde';
+import TableEngorde from '../../ui/engorde/TableEngorde';
+import RegistroNuevoLote from '../../ui/engorde/RegistroNuevoLote';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
-  },
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
-}));
-
-function createData(
-  lote: string,
-  cantidad: number,
-  edad: number,
-  peso: number,
-  consumo: number,
-  progreso: number,
-) {
-  return { lote, cantidad, edad, peso, consumo, progreso };
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-const initialRows = [
-  createData('Lote A', 159, 60, 24, 4.0, 78),
-  createData('Lote B', 120, 45, 20, 3.5, 65),
-];
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
-export default function EngordePage() {
-  
-  const [rows, setRows] = React.useState(initialRows);
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Fade in={true} timeout={300}>
+          <Box sx={{ py: 3 }}>
+            {children}
+          </Box>
+        </Fade>
+      )}
+    </div>
+  );
+}
 
-  const [editIndex, setEditIndex] = React.useState<number | null>(null);
-  const [showForm, setShowForm] = React.useState(false);
-  function handleClick(){
-    setShowForm(!showForm)
-  }
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
-  const [lote, setLote] = React.useState("");
-  const [cantidad, setCantidad] = React.useState("");
-  const [edad, setEdad] = React.useState("");
-  const [peso, setPeso] = React.useState("");
-  const [consumo, setConsumo] = React.useState("");
+const EngordePageContent: React.FC = () => {
+  const { loading, error, obtenerLotes } = useEngorde();
+  const [value, setValue] = useState(0);
+  const [openRegistro, setOpenRegistro] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-
-  const handleDelete = (lote: string) => {
-    setRows(rows.filter((row) => row.lote !== lote));
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
 
-  const handleEdit = (index: number) => {
-    const row = rows[index];
-    setLote(row.lote);
-    setCantidad(String(row.cantidad));
-    setEdad(String(row.edad));
-    setPeso(String(row.peso));
-    setConsumo(String(row.consumo));
-    setEditIndex(index); 
-    setShowForm(true);
+  const handleOpenRegistro = () => {
+    setOpenRegistro(true);
   };
 
-  const handleSave = () => {
-    if (!lote || !cantidad) {
-      setOpenSnackbar(true);
-      return;
-    }
+  const handleCloseRegistro = () => {
+    setOpenRegistro(false);
+  };
 
-    const newRow = createData(
-      lote,
-      Number(cantidad),
-      Number(edad),
-      Number(peso),
-      Number(consumo),
-      editIndex !== null ? rows[editIndex].progreso : 0 
-    );
+  const handleLoteCreated = () => {
+    setRefreshKey(prev => prev + 1);
+    setSuccessMessage('Lote registrado exitosamente');
+    obtenerLotes(); // Refrescar datos
+  };
 
-    if (editIndex !== null) {
-      const updatedRows = [...rows];
-      updatedRows[editIndex] = newRow;
-      setRows(updatedRows);
-    } else {
-      setRows([...rows, newRow]);
-    }
-
-    setShowForm(false);
-    setEditIndex(null);
-    setLote("");
-    setCantidad("");
-    setEdad("");
-    setPeso("");
-    setConsumo("");
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
   };
 
   return (
-    <>
-      <main>
-       <HeaderGestion title='Gestion de cerdos de engorde' textButton='Nuevo lote' setShowForm={handleClick}/>
-          {showForm && (
-            <div className="bg-white rounded-xl shadow-md p-6 mb-8 mt-5">
-              <h2 className="text-xl font-semibold mb-4">
-                {editIndex !== null ? "Editar lote" : "Registrar nuevo lote"}
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <TextField label="Nombre del lote" value={lote} onChange={(e) => setLote(e.target.value)} fullWidth />
-                <TextField label="Cantidad" type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)} fullWidth />
-                <TextField label="Edad (días)" type="number" value={edad} onChange={(e) => setEdad(e.target.value)} fullWidth />
-                <TextField label="Peso Prom." type="number" value={peso} onChange={(e) => setPeso(e.target.value)} fullWidth />
-                <TextField label="Consumo/día" type="number" value={consumo} onChange={(e) => setConsumo(e.target.value)} fullWidth />
-              </div>
-              <div className="flex justify-end mt-4 gap-3">
-                <Button color='secondary' onClick={() => { setShowForm(false); setEditIndex(null); }}
-                  sx={{
-                      color: "#171717",
-                      '&:hover': {
-                        backgroundColor: '#D3B8A1',
-                      },
-                    }}>
-                  Cancelar
-                </Button>
-                <Button  variant="contained" onClick={handleSave} 
-                  sx={{
-                  '&:hover': {
-                    backgroundColor: '#D3B8A1',
-                  },
-                  }}>
-                  {editIndex !== null ? "Actualizar" : "Guardar"}
-                </Button>
-              </div>
-            </div>
-          )}
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Encabezado */}
+      <Box sx={{ mb: 4 }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2
+          }}
+        >
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              🐷 Gestión de Engorde
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Administra y monitorea los lotes de cerdos en proceso de engorde
+            </Typography>
+          </Box>
+          
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpenRegistro}
+            sx={{
+              backgroundColor: "#99775C",
+              '&:hover': {
+                backgroundColor: '#7a6049',
+              },
+              borderRadius: 2,
+              px: 3,
+              py: 1,
+            }}
+          >
+            Nuevo Lote
+          </Button>
+        </Box>
+      </Box>
 
-          <div className="bg-white rounded-xl shadow-xl/20 inset-shadow-sm p-6 mb-8">
-            <h2 className="font-semibold mb-4">Evolucion del peso por el lote</h2>
-              <div className="h-40 flex items-center justify-center text-gray-400">
-                grafica
-              </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-xl/20 inset-shadow-sm p-6 mb-8">
-            <h1>Lotes en engorde</h1>
-            <TableContainer className="mt-3" component={Paper}>
-              <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Lote</StyledTableCell>
-                    <StyledTableCell align="right">Cantidad</StyledTableCell>
-                    <StyledTableCell align="right">Edad(días)</StyledTableCell>
-                    <StyledTableCell align="right">Peso Prom.</StyledTableCell>
-                    <StyledTableCell align="right">Consumo/día</StyledTableCell>
-                    <StyledTableCell align="right">Progreso</StyledTableCell>
-                    <StyledTableCell align="right">Acciones</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {rows.map((row, index) => (
-                    <StyledTableRow key={row.lote}>
-                      <StyledTableCell component="th" scope="row">{row.lote}</StyledTableCell>
-                      <StyledTableCell align="right">{row.cantidad}</StyledTableCell>
-                      <StyledTableCell align="right">{row.edad}</StyledTableCell>
-                      <StyledTableCell align="right">{row.peso}</StyledTableCell>
-                      <StyledTableCell align="right">{row.consumo}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        <div>
-                          <span className="text-xs text-gray-500 mb-1">{row.progreso}%</span>
-                          <LinearProgress
-                            variant="determinate"
-                            value={row.progreso}
-                            sx={{
-                              width: 120,
-                              height: 8,
-                              borderRadius: 5,
-                              backgroundColor: 'e0e0e0',
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 5,
-                                background: 'linear-gradient(90deg, #4facfe 0%, #6a82fb 100%)',
-                              }
-                            }}
-                          />
-                        </div>
-                      </StyledTableCell>
-
-                      <StyledTableCell align="right">
-                        <IconButton onClick={() => handleEdit(index)} aria-label="editar" size="small">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => handleDelete(row.lote)} aria-label="delete" size="small">
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-      </main>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={2500}
-        onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      {/* Contenido principal */}
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          borderRadius: 3,
+          overflow: 'hidden',
+        }}
       >
-        <Alert onClose={() => setOpenSnackbar(false)} severity="error" sx={{ width: "100%" }}>
-          Debes completar al todos los campos
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={value} 
+            onChange={handleChange} 
+            aria-label="tabs de gestión de engorde"
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: 500,
+                '&.Mui-selected': {
+                  color: '#99775C',
+                },
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#99775C',
+              },
+            }}
+          >
+            <Tab 
+              icon={<AssessmentIcon />} 
+              label="Resumen" 
+              {...a11yProps(0)}
+              iconPosition="start"
+            />
+            <Tab 
+              icon={<TableIcon />} 
+              label="Lista de Lotes" 
+              {...a11yProps(1)}
+              iconPosition="start"
+            />
+          </Tabs>
+        </Box>
+
+        {/* Panel de Resumen */}
+        <TabPanel value={value} index={0}>
+          <CardsEngorde />
+        </TabPanel>
+
+        {/* Panel de Lista */}
+        <TabPanel value={value} index={1}>
+          <TableEngorde />
+        </TabPanel>
+      </Paper>
+
+      {/* Diálogo de registro de nuevo lote */}
+      <RegistroNuevoLote
+        open={openRegistro}
+        onClose={handleCloseRegistro}
+        onLoteCreated={handleLoteCreated}
+      />
+
+      {/* Snackbar para mensajes de éxito */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={handleCloseSuccessMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSuccessMessage} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
         </Alert>
       </Snackbar>
-    </>
+    </Container>
   );
-}
+};
+
+export default EngordePageContent;

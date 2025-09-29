@@ -3,7 +3,7 @@
 import { useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -30,14 +30,16 @@ export default function ProtectedRoute({
   // Mostrar spinner mientras se verifica la autenticación
   if (loading) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="100vh"
+      <div 
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh'
+        }}
       >
         <CircularProgress size={60} />
-      </Box>
+      </div>
     );
   }
 

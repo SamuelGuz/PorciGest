@@ -43,7 +43,34 @@ def create_tratamiento_veterinario(
         raise HTTPException(status_code=404, detail="Lote de engorde no encontrado")
 
     # Pasamos el ID del usuario actual a la función del CRUD
-    return crud.create_tratamiento(db=db, tratamiento=tratamiento, user_id=current_user.id)
+    new_tratamiento = crud.create_tratamiento(db=db, tratamiento=tratamiento, user_id=current_user.id)
+    
+    # Registrar movimiento automáticamente
+    try:
+        # Determinar el tipo de entidad tratada
+        entidad_desc = ""
+        if tratamiento.reproductora_id:
+            entidad_desc = f"reproductora ID {tratamiento.reproductora_id}"
+        elif tratamiento.semental_id:
+            entidad_desc = f"semental ID {tratamiento.semental_id}"
+        elif tratamiento.lote_engorde_id:
+            entidad_desc = f"lote de engorde ID {tratamiento.lote_engorde_id}"
+        
+        crud.registrar_movimiento_automatico(
+            db=db,
+            usuario_id=current_user.id,
+            usuario_nombre=f"{current_user.nombre} {current_user.apellido}",
+            accion="Registró tratamiento veterinario",
+            modulo="Veterinaria",
+            descripcion=f"Tratamiento: {new_tratamiento.tipo_intervencion} en {entidad_desc}",
+            tipo_movimiento="crear",
+            entidad_tipo="tratamiento_veterinario",
+            entidad_id=new_tratamiento.id
+        )
+    except Exception as e:
+        print(f"Error registrando movimiento: {e}")
+    
+    return new_tratamiento
 
 
 @router.get("/", response_model=List[schemas.Tratamiento])
@@ -88,6 +115,23 @@ def update_tratamiento_veterinario(
     db_tratamiento = crud.update_tratamiento(db, tratamiento_id=tratamiento_id, tratamiento_update=tratamiento)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para actualizar")
+    
+    # Registrar movimiento automáticamente
+    try:
+        crud.registrar_movimiento_automatico(
+            db=db,
+            usuario_id=current_user.id,
+            usuario_nombre=f"{current_user.nombre} {current_user.apellido}",
+            accion="Actualizó tratamiento veterinario",
+            modulo="Veterinaria",
+            descripcion=f"Tratamiento ID {tratamiento_id}: {db_tratamiento.tipo_intervencion}",
+            tipo_movimiento="actualizar",
+            entidad_tipo="tratamiento_veterinario",
+            entidad_id=db_tratamiento.id
+        )
+    except Exception as e:
+        print(f"Error registrando movimiento: {e}")
+    
     return db_tratamiento
 
 
@@ -100,7 +144,29 @@ def delete_tratamiento_veterinario(
     """
     Elimina el registro de una intervención veterinaria.
     """
+    # Obtener datos antes de eliminar para el registro
+    tratamiento_info = crud.get_tratamiento(db, tratamiento_id=tratamiento_id)
+    if tratamiento_info is None:
+        raise HTTPException(status_code=404, detail="Tratamiento no encontrado para eliminar")
+    
     db_tratamiento = crud.delete_tratamiento(db, tratamiento_id=tratamiento_id)
     if db_tratamiento is None:
         raise HTTPException(status_code=404, detail="Tratamiento no encontrado para eliminar")
+    
+    # Registrar movimiento automáticamente
+    try:
+        crud.registrar_movimiento_automatico(
+            db=db,
+            usuario_id=current_user.id,
+            usuario_nombre=f"{current_user.nombre} {current_user.apellido}",
+            accion="Eliminó tratamiento veterinario",
+            modulo="Veterinaria",
+            descripcion=f"Tratamiento eliminado: {tratamiento_info.tipo_intervencion}",
+            tipo_movimiento="eliminar",
+            entidad_tipo="tratamiento_veterinario",
+            entidad_id=tratamiento_id
+        )
+    except Exception as e:
+        print(f"Error registrando movimiento: {e}")
+    
     return db_tratamiento

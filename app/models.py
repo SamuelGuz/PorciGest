@@ -1,6 +1,7 @@
 # app/models.py
-from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 from .database import Base
 
@@ -21,6 +22,7 @@ class User(Base):
     camadas = relationship("CamadaLechones", back_populates="propietario")
     lotes_engorde = relationship("LoteEngorde", back_populates="propietario")
     tratamientos = relationship("TratamientoVeterinario", back_populates="propietario")
+    movimientos = relationship("Movimiento", foreign_keys="Movimiento.usuario_id")
 
 
 class CerdaReproductora(Base):
@@ -70,9 +72,10 @@ class LoteEngorde(Base):
     __tablename__ = "lotes_engorde"
     id = Column(Integer, primary_key=True, index=True)
     lote_id_str = Column(String, unique=True, index=True, nullable=False)
-    cantidad_animales = Column(Integer, nullable=False)
-    edad_dias = Column(Integer)
-    peso_promedio_kg = Column(Float)
+    fecha_inicio = Column(Date, nullable=False)
+    numero_cerdos = Column(Integer, nullable=False)
+    peso_inicial_promedio = Column(Float)
+    peso_actual_promedio = Column(Float)
     camada_origen_id = Column(Integer, ForeignKey("camadas_lechones.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     
@@ -99,3 +102,23 @@ class TratamientoVeterinario(Base):
     reproductora = relationship("CerdaReproductora", back_populates="tratamientos")
     semental = relationship("Semental", back_populates="tratamientos")
     lote_engorde = relationship("LoteEngorde", back_populates="tratamientos")
+
+
+class Movimiento(Base):
+    __tablename__ = "movimientos"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    usuario_nombre = Column(String, nullable=False)  # Para facilitar consultas
+    accion = Column(String, nullable=False)
+    modulo = Column(String, nullable=False)  # reproductoras, sementales, lechones, engorde, veterinaria
+    descripcion = Column(String)
+    entidad_tipo = Column(String)  # tipo de entidad afectada (cerda, semental, camada, etc.)
+    entidad_id = Column(Integer)  # ID de la entidad afectada
+    tipo_movimiento = Column(String, nullable=False)  # crear, editar, eliminar
+    fecha_movimiento = Column(DateTime, default=datetime.utcnow, nullable=False)
+    ip_address = Column(String)  # IP del usuario para auditoría
+    user_agent = Column(String)  # Información del navegador
+    
+    # Relación con usuario
+    usuario = relationship("User", foreign_keys=[usuario_id], overlaps="movimientos")

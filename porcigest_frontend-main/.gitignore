@@ -1,41 +1,206 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ============================================================================
+# GITIGNORE - PORCIGEST FRONTEND (Next.js/React)
+# ============================================================================
+# Actualizado: 29 de septiembre de 2025
+# Next.js 15.5.2 + React 19 + Material-UI + TypeScript
 
-# dependencies
+# --- Dependencias Node.js ---
+# Módulos de node - nunca subir al repositorio
 /node_modules
 /.pnp
 .pnp.*
+.pnp.js
+
+# Yarn
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+yarn-error.log*
+yarn-debug.log*
 
-# testing
-/coverage
+# npm
+npm-debug.log*
+npm-error.log*
+.npm
 
-# next.js
+# pnpm
+.pnpm-debug.log*
+.pnpm-store/
+
+# --- Next.js ---
+# Archivos de build y caché de Next.js
 /.next/
 /out/
+.next/
+next-env.d.ts
 
-# production
+# Build de producción
 /build
+/dist
 
-# misc
-.DS_Store
-*.pem
+# --- Testing ---
+# Archivos de testing y coverage
+/coverage
+*.lcov
+.nyc_output
 
-# debug
+# --- Variables de Entorno ---
+# ¡CRÍTICO! Archivos con configuración sensible
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Archivos específicos de entorno
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- TypeScript ---
+# Archivos generados por TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+*.d.ts.map
+
+# --- Logs ---
+# Archivos de log del sistema
+*.log
+logs/
+log/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# --- IDEs y Editores ---
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
 
-# vercel
+# WebStorm/IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+*.swp
+*.swo
+
+# --- Sistema Operativo ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# --- Archivos Temporales ---
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# --- Certificados ---
+# Certificados SSL/TLS
+*.pem
+*.key
+*.crt
+*.cer
+
+# --- Deployment Platforms ---
+# Vercel
 .vercel
+.vercel.json
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Netlify
+.netlify/
+
+# --- Runtime data ---
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# --- Optional npm cache directory ---
+.npm
+
+# --- Optional eslint cache ---
+.eslintcache
+
+# --- Storybook build outputs ---
+.out
+.storybook-out
+storybook-static
+
+# --- Specific to PorciGest Frontend ---
+# Archivos específicos del proyecto
+uploads/
+exports/
+reports/
+static/uploads/
+
+# PDFs generados localmente
+*.pdf
+/pdfs/
+
+# Archivos de backup
+*.backup
+
+# --- Turbopack (Next.js) ---
+# Caché específico de Turbopack
+.turbo/
+
+# --- Miscellaneous ---
+# Miscellaneous
+.cache/
+.parcel-cache/
+
+# Lock files (depende del gestor de paquetes usado)
+# Descomenta según el que uses:
+# package-lock.json  # npm
+# yarn.lock          # yarn
+# pnpm-lock.yaml     # pnpm
+
+# ============================================================================

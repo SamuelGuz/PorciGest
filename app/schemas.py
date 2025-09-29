@@ -1,6 +1,6 @@
 # app/schemas.py
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 # --- ESQUEMAS PARA USUARIOS Y AUTENTICACIÓN ---
@@ -90,17 +90,23 @@ class Camada(CamadaBase):
 # --- ESQUEMAS PARA LOTES DE ENGORDE ---
 class LoteEngordeBase(BaseModel):
     lote_id_str: str
-    cantidad_animales: int
-    edad_dias: Optional[int] = None
-    peso_promedio_kg: Optional[float] = None
+    fecha_inicio: date
+    numero_cerdos: int
+    peso_inicial_promedio: Optional[float] = None
+    peso_actual_promedio: Optional[float] = None
     camada_origen_id: int
-class LoteEngordeCreate(LoteEngordeBase): pass
+
+class LoteEngordeCreate(LoteEngordeBase): 
+    pass
+
 class LoteEngordeUpdate(BaseModel):
     lote_id_str: Optional[str] = None
-    cantidad_animales: Optional[int] = None
-    edad_dias: Optional[int] = None
-    peso_promedio_kg: Optional[float] = None
+    fecha_inicio: Optional[date] = None
+    numero_cerdos: Optional[int] = None
+    peso_inicial_promedio: Optional[float] = None
+    peso_actual_promedio: Optional[float] = None
     camada_origen_id: Optional[int] = None
+
 class LoteEngorde(LoteEngordeBase):
     id: int
     camada_origen: Camada
@@ -137,3 +143,40 @@ class Tratamiento(TratamientoBase):
     lote_engorde: Optional[LoteEngorde] = None
     propietario: UserPublic
     class Config: from_attributes = True
+
+
+# --- ESQUEMAS PARA MOVIMIENTOS ---
+
+class MovimientoBase(BaseModel):
+    accion: str
+    modulo: str
+    descripcion: Optional[str] = None
+    entidad_tipo: Optional[str] = None
+    entidad_id: Optional[int] = None
+    tipo_movimiento: str  # crear, editar, eliminar
+
+class MovimientoCreate(MovimientoBase):
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+
+class Movimiento(MovimientoBase):
+    id: int
+    usuario_id: int
+    usuario_nombre: str
+    fecha_movimiento: datetime
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    
+    class Config: 
+        from_attributes = True
+
+# Schema para filtros de búsqueda
+class MovimientoFilters(BaseModel):
+    search: Optional[str] = None
+    modulo: Optional[str] = None
+    tipo_movimiento: Optional[str] = None
+    fecha_inicio: Optional[date] = None
+    fecha_fin: Optional[date] = None
+    usuario_id: Optional[int] = None
+    page: Optional[int] = 1
+    size: Optional[int] = 10
