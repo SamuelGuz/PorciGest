@@ -26,18 +26,23 @@ export const authService = {
         },
       });
 
-      // Extraer el token de la respuesta
-      const { access_token, token_type, ...userData } = response.data;
+      // Extraer el token y datos del usuario de la respuesta
+      const { access_token, token_type, nombre, apellido, numero_documento, tipo_documento } = response.data;
 
       // Guardar el token en localStorage
       if (access_token) {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('token_type', token_type || 'bearer');
         
-        // Opcional: Guardar información adicional del usuario
-        if (userData && Object.keys(userData).length > 0) {
-          localStorage.setItem('user_data', JSON.stringify(userData));
-        }
+        // Guardar información del usuario
+        const userData = {
+          nombre,
+          apellido,
+          numeroDocumento: numero_documento,
+          tipoDocumento: tipo_documento
+        };
+        
+        localStorage.setItem('user_data', JSON.stringify(userData));
       }
 
       return {
@@ -45,7 +50,10 @@ export const authService = {
         data: {
           access_token,
           token_type,
-          ...userData,
+          nombre,
+          apellido,
+          numeroDocumento: numero_documento,
+          tipoDocumento: tipo_documento
         },
       };
 

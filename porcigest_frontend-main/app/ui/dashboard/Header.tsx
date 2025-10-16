@@ -33,13 +33,13 @@ export default function Header() {
           <div>
             <h3 className="text-2xl">Porcigest</h3>
             <span id="name-user-responsive" className="block md:hidden">
-              {user?.nombre || user?.numeroDocumento || 'Usuario'}
+              {user?.nombre || user?.numeroDocumento || user?.numero_documento || 'Usuario'}
             </span>
           </div>
         </div>
         <div id="profile-user" className="flex gap-2">
           <span className="hidden md:block">
-            {user?.nombre || user?.numeroDocumento || 'Usuario'}
+            {user?.nombre || user?.numeroDocumento || user?.numero_documento || 'Usuario'}
           </span>
           <div id="logout" className="flex items-center gap-1 font-semibold">
             <Box display={{ xs: "none", md: "block" }}>
@@ -47,7 +47,7 @@ export default function Header() {
                 onClick={handleLogout}
                 className="flex items-center gap-1 hover:text-red-600 transition-colors"
               >
-                <span>Logout</span>
+                <span>Cerrar Sesion</span>
                 <LogoutOutlined />
               </button>
             </Box>

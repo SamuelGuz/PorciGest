@@ -35,6 +35,7 @@ import { styled } from "@mui/material/styles";
 import { tableCellClasses } from "@mui/material";
 import { useState } from "react";
 import { useSementales, type Semental } from "../../../src/hooks/useSementales";
+import DetallesSemental from "./DetallesSemental";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -82,6 +83,14 @@ const TableSementales = () => {
     semental: null
   });
 
+  const [viewDialog, setViewDialog] = useState<{
+    open: boolean;
+    semental: Semental | null;
+  }>({
+    open: false,
+    semental: null
+  });
+
   const [editFormData, setEditFormData] = useState<{
     nombre: string;
     raza: string;
@@ -111,6 +120,14 @@ const TableSementales = () => {
     });
     setEditDialog({ open: true, semental });
     setFormErrors({});
+  };
+
+  const handleViewClick = (semental: Semental) => {
+    setViewDialog({ open: true, semental });
+  };
+
+  const handleViewClose = () => {
+    setViewDialog({ open: false, semental: null });
   };
 
   const handleDeleteConfirm = async () => {
@@ -257,10 +274,7 @@ const TableSementales = () => {
                       <Tooltip title="Detalles">
                         <IconButton 
                           color="info"
-                          onClick={() => {
-                            // TODO: Implementar vista de detalles
-                            console.log('Ver detalles semental:', semental.id);
-                          }}
+                          onClick={() => handleViewClick(semental)}
                         >
                           <VisibilityRounded />
                         </IconButton>
@@ -394,6 +408,13 @@ const TableSementales = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Modal de detalles del semental */}
+      <DetallesSemental
+        open={viewDialog.open}
+        semental={viewDialog.semental}
+        onClose={handleViewClose}
+      />
     </>
   );
 };

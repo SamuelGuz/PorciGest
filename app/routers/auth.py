@@ -24,7 +24,7 @@ def login_for_access_token(db: Session = Depends(security.get_db), form_data: OA
     """
     Endpoint para el login de usuario.
     Recibe 'username' (que será el número de documento) y 'password'.
-    Devuelve un token de acceso.
+    Devuelve un token de acceso y datos del usuario.
     """
     user = crud.get_user_by_documento(db, numero_documento=form_data.username)
     if not user or not security.verify_password(form_data.password, user.hashed_password):
@@ -38,4 +38,11 @@ def login_for_access_token(db: Session = Depends(security.get_db), form_data: OA
     access_token = security.create_access_token(
         data={"sub": user.numero_documento}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "nombre": user.nombre,
+        "apellido": user.apellido,
+        "numero_documento": user.numero_documento,
+        "tipo_documento": user.tipo_documento
+    }

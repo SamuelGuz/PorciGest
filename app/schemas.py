@@ -27,6 +27,10 @@ class User(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    nombre: str
+    apellido: str
+    numero_documento: str
+    tipo_documento: str
 class TokenData(BaseModel):
     numero_documento: Optional[str] = None
 
