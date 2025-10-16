@@ -328,10 +328,10 @@ export default function AboutUs() {
       <Box sx={{ bgcolor: '#99775C', color: 'white', py: 3, mt: 4 }}>
         <Container maxWidth="lg">
           <Typography variant="body2" textAlign="center">
-            © 2024 PorciGest - Sistema Integral de Gestión Porcina
+            © 2025 PorciGest - Sistema Integral de Gestión Porcina
           </Typography>
           <Typography variant="body2" textAlign="center" sx={{ mt: 1, opacity: 0.8 }}>
-            Desarrollado con ❤️ para la porcicultura moderna
+            Desarrollado por aprendices del C.A.S.A para la porcicultura moderna
           </Typography>
         </Container>
       </Box>
